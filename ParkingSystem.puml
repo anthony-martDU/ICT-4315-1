@@ -1,0 +1,127 @@
+@startuml ParkingSystem
+
+' Actual implementation in com.example.parkingsystem
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "com.example.parkingsystem" {
+
+    interface Command {
+        +getCommandName() : String
+        +getDisplayName() : String
+        +execute(params : Properties) : String
+    }
+
+    enum CarType {
+        COMPACT
+        SUV
+    }
+
+    class Address {
+        -streetAddress1 : String
+        -streetAddress2 : String
+        -city : String
+        -state : String
+        -zip : String
+        ..
+        +Address(streetAddress1 : String, streetAddress2 : String, city : String, state : String, zip : String)
+        +getAddressInfo() : String
+    }
+
+    class Customer {
+        -id : String
+        -firstName : String
+        -lastName : String
+        -phoneNumber : String
+        -address : Address
+        ..
+        +Customer(id : String, firstName : String, lastName : String, phoneNumber : String, address : Address)
+        +getCustomerName() : String
+        +getId() : String
+        ~assignId(id : String) : void
+    }
+
+    class Car {
+        -type : CarType
+        -licensePlate : String
+        -owner : Customer
+        ..
+        +Car(type : CarType, licensePlate : String, owner : Customer)
+        +getType() : CarType
+        +getLicensePlate() : String
+        +getOwner() : Customer
+    }
+
+    class ParkingOffice {
+        -customers : Map<String, Customer>
+        -cars : Map<String, Car>
+        -nextCustomerNumber : int
+        -nextPermitNumber : int
+        ..
+        +ParkingOffice()
+        +register(customer : Customer) : String
+        +register(car : Car) : String
+        +getCustomer(customerId : String) : Customer
+        +getCar(permitId : String) : Car
+    }
+
+    class ParkingService {
+        -office : ParkingOffice
+        -commands : Map<String, Command>
+        ..
+        +ParkingService(office : ParkingOffice)
+        -register(command : Command) : void
+        +performCommand(commandName : String, parameters : String[]) : String
+    }
+
+    class RegisterCustomerCommand {
+        -office : ParkingOffice
+        ..
+        +RegisterCustomerCommand(office : ParkingOffice)
+        +getCommandName() : String
+        +getDisplayName() : String
+        +execute(params : Properties) : String
+        -checkParameters(params : Properties) : void
+        -require(params : Properties, name : String) : void
+    }
+
+    class RegisterCarCommand {
+        -office : ParkingOffice
+        ..
+        +RegisterCarCommand(office : ParkingOffice)
+        +getCommandName() : String
+        +getDisplayName() : String
+        +execute(params : Properties) : String
+        -checkParameters(params : Properties) : void
+        -require(params : Properties, name : String) : void
+    }
+
+    class ParkingApplication {
+        +ParkingApplication()
+        +{static} main(args : String[]) : void
+    }
+}
+
+' Interface implementation
+RegisterCustomerCommand ..|> Command
+RegisterCarCommand ..|> Command
+
+' Object relationships and dependencies
+ParkingService "1" *-- "2" Command : commands
+ParkingService "1" --> "1" ParkingOffice : office
+ParkingService ..> RegisterCustomerCommand : creates
+ParkingService ..> RegisterCarCommand : creates
+
+RegisterCustomerCommand "1" --> "1" ParkingOffice : office
+RegisterCarCommand "1" --> "1" ParkingOffice : office
+
+ParkingOffice "1" o-- "0..*" Customer : customers
+ParkingOffice "1" o-- "0..*" Car : cars / permits
+Car "0..*" --> "0..1" Customer : owner
+Customer "0..*" --> "0..1" Address : address
+Car "0..*" --> "1" CarType : type
+
+ParkingApplication ..> ParkingOffice : creates
+ParkingApplication ..> ParkingService : creates and uses
+
+@enduml

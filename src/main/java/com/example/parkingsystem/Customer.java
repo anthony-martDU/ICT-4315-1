@@ -1,7 +1,7 @@
 package com.example.parkingsystem;
 
 public class Customer {
-    private final String id;
+    private String id;
     private final String firstName;
     private final String lastName;
     private final String phoneNumber;
@@ -18,5 +18,13 @@ public class Customer {
 
     public String getCustomerName() {
         return firstName + " " + lastName;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    void assignId(String id) {
+        this.id = id;
     }
 }
