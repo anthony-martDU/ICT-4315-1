@@ -6,6 +6,7 @@ import java.util.Map;
 public class ParkingOffice {
     private final Map<String, Customer> customers = new LinkedHashMap<>();
     private final Map<String, Car> cars = new LinkedHashMap<>();
+    private final Map<String, ParkingPermit> permits = new LinkedHashMap<>();
     private int nextCustomerNumber = 1;
     private int nextPermitNumber = 1;
 
@@ -19,6 +20,7 @@ public class ParkingOffice {
     public String register(Car car) {
         String permitId = "permit-" + nextPermitNumber++;
         cars.put(permitId, car);
+        permits.put(permitId, new ParkingPermit(permitId, car));
         return permitId;
     }
 
@@ -28,5 +30,9 @@ public class ParkingOffice {
 
     public Car getCar(String permitId) {
         return cars.get(permitId);
+    }
+
+    public ParkingPermit getPermit(String permitId) {
+        return permits.get(permitId);
     }
 }

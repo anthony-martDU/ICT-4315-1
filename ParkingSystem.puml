@@ -17,6 +17,65 @@ package "com.example.parkingsystem" {
         SUV
     }
 
+    class Money {
+        -amount : BigDecimal
+        ..
+        +Money(amount : BigDecimal)
+        +getAmount() : BigDecimal
+        +multiply(multiplier : BigDecimal) : Money
+        +add(other : Money) : Money
+    }
+
+    class ParkingPermit {
+        -id : String
+        -car : Car
+        ..
+        +ParkingPermit(id : String, car : Car)
+        +getId() : String
+        +getCar() : Car
+        +getOwner() : Customer
+    }
+
+    class ParkingLot {
+        -name : String
+        -baseRate : Money
+        -chargeStrategy : ParkingChargeStrategy
+        ..
+        +ParkingLot(name : String, baseRate : Money, strategy : ParkingChargeStrategy)
+        +getChargeStrategy() : ParkingChargeStrategy
+        +setChargeStrategy(strategy : ParkingChargeStrategy) : void
+        +calculateCharge(entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
+    }
+
+    interface ParkingChargeStrategy {
+        +calculateCharge(baseRate : Money, entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
+    }
+
+    class HourlyParkingChargeStrategy
+    class SundayFreeParkingChargeStrategy
+    class SuvDiscountParkingChargeStrategy
+    class ParkingChargeStrategyFactory {
+        +create(sundayIsFree : boolean) : ParkingChargeStrategy
+    }
+
+    class ParkingTransaction {
+        -parkingLot : ParkingLot
+        -permit : ParkingPermit
+        -entryTime : LocalDateTime
+        -exitTime : LocalDateTime
+        -charge : Money
+        ..
+        +getCharge() : Money
+    }
+
+    class TransactionManager {
+        +createTransaction(lot : ParkingLot, permit : ParkingPermit, entry : LocalDateTime, exit : LocalDateTime) : ParkingTransaction
+    }
+
+    class ParkingChargeService {
+        +calculateCharge(lot : ParkingLot, permit : ParkingPermit, entry : LocalDateTime, exit : LocalDateTime) : Money
+    }
+
     class Address {
         -streetAddress1 : String
         -streetAddress2 : String
@@ -105,6 +164,9 @@ package "com.example.parkingsystem" {
 ' Interface implementation
 RegisterCustomerCommand ..|> Command
 RegisterCarCommand ..|> Command
+HourlyParkingChargeStrategy ..|> ParkingChargeStrategy
+SundayFreeParkingChargeStrategy ..|> ParkingChargeStrategy
+SuvDiscountParkingChargeStrategy ..|> ParkingChargeStrategy
 
 ' Object relationships and dependencies
 ParkingService "1" *-- "2" Command : commands
@@ -117,9 +179,22 @@ RegisterCarCommand "1" --> "1" ParkingOffice : office
 
 ParkingOffice "1" o-- "0..*" Customer : customers
 ParkingOffice "1" o-- "0..*" Car : cars / permits
+ParkingOffice "1" o-- "0..*" ParkingPermit : permits
 Car "0..*" --> "0..1" Customer : owner
+ParkingPermit "1" --> "1" Car : vehicle
 Customer "0..*" --> "0..1" Address : address
 Car "0..*" --> "1" CarType : type
+
+ParkingLot "1" --> "1" Money : base rate
+ParkingLot "1" --> "1" ParkingChargeStrategy : uses
+ParkingTransaction "1" --> "1" ParkingLot : lot
+ParkingTransaction "1" --> "1" ParkingPermit : permit
+TransactionManager ..> ParkingLot : charges
+TransactionManager ..> ParkingTransaction : creates
+ParkingChargeService ..> ParkingLot : calculates
+ParkingChargeStrategyFactory ..> ParkingChargeStrategy : creates
+SundayFreeParkingChargeStrategy ..> ParkingChargeStrategy : delegates
+SuvDiscountParkingChargeStrategy ..> ParkingChargeStrategy : decorates
 
 ParkingApplication ..> ParkingOffice : creates
 ParkingApplication ..> ParkingService : creates and uses

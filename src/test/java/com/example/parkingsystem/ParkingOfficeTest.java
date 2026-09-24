@@ -30,5 +30,6 @@ class ParkingOfficeTest {
 
         assertEquals("permit-1", permitId);
         assertSame(car, office.getCar(permitId));
+        assertSame(car, office.getPermit(permitId).getCar());
     }
 }
