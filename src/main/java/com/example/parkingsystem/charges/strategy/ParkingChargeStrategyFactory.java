@@ -6,6 +6,6 @@ public class ParkingChargeStrategyFactory {
         ParkingChargeStrategy dayStrategy = sundayIsFree
                 ? new SundayFreeParkingChargeStrategy(hourly)
                 : hourly;
-        return new SuvDiscountParkingChargeStrategy(dayStrategy);
+        return new CompactDiscountParkingChargeStrategy(dayStrategy);
     }
 }

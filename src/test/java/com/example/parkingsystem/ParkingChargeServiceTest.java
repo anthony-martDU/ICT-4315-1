@@ -19,6 +19,6 @@ class ParkingChargeServiceTest {
                 LocalDateTime.of(2026, 9, 24, 9, 0),
                 LocalDateTime.of(2026, 9, 24, 10, 0));
 
-        assertEquals(new Money(2), charge);
+        assertEquals(new Money(1.60), charge);
     }
 }

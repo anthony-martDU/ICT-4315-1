@@ -8,11 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class SuvDiscountParkingChargeStrategy implements ParkingChargeStrategy {
-    private static final BigDecimal SUV_RATE = new BigDecimal("0.80");
+public class CompactDiscountParkingChargeStrategy implements ParkingChargeStrategy {
+    private static final BigDecimal COMPACT_RATE = new BigDecimal("0.80");
     private final ParkingChargeStrategy regularStrategy;
 
-    public SuvDiscountParkingChargeStrategy(ParkingChargeStrategy regularStrategy) {
+    public CompactDiscountParkingChargeStrategy(
+            ParkingChargeStrategy regularStrategy) {
         this.regularStrategy = Objects.requireNonNull(regularStrategy,
                 "regularStrategy");
     }
@@ -23,8 +24,8 @@ public class SuvDiscountParkingChargeStrategy implements ParkingChargeStrategy {
         Objects.requireNonNull(permit, "permit");
         Money charge = regularStrategy.calculateCharge(baseRate, entryTime,
                 exitTime, permit);
-        if (permit.getCar().getType() == CarType.SUV) {
-            return charge.multiply(SUV_RATE);
+        if (permit.getCar().getType() == CarType.COMPACT) {
+            return charge.multiply(COMPACT_RATE);
         }
         return charge;
     }

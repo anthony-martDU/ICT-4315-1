@@ -14,7 +14,7 @@ class TransactionManagerTest {
         ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
                 new ParkingChargeStrategyFactory().create(true));
         ParkingPermit permit = new ParkingPermit("permit-1",
-                new Car(CarType.SUV, "ABC-123", null));
+                new Car(CarType.COMPACT, "ABC-123", null));
         LocalDateTime entry = LocalDateTime.of(2026, 9, 24, 9, 0);
         LocalDateTime exit = LocalDateTime.of(2026, 9, 24, 10, 1);
 

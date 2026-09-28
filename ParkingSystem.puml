@@ -53,7 +53,7 @@ package "com.example.parkingsystem" {
 
     class HourlyParkingChargeStrategy
     class SundayFreeParkingChargeStrategy
-    class SuvDiscountParkingChargeStrategy
+    class CompactDiscountParkingChargeStrategy
     class ParkingChargeStrategyFactory {
         +create(sundayIsFree : boolean) : ParkingChargeStrategy
     }
@@ -166,7 +166,7 @@ RegisterCustomerCommand ..|> Command
 RegisterCarCommand ..|> Command
 HourlyParkingChargeStrategy ..|> ParkingChargeStrategy
 SundayFreeParkingChargeStrategy ..|> ParkingChargeStrategy
-SuvDiscountParkingChargeStrategy ..|> ParkingChargeStrategy
+CompactDiscountParkingChargeStrategy ..|> ParkingChargeStrategy
 
 ' Object relationships and dependencies
 ParkingService "1" *-- "2" Command : commands
@@ -194,7 +194,7 @@ TransactionManager ..> ParkingTransaction : creates
 ParkingChargeService ..> ParkingLot : calculates
 ParkingChargeStrategyFactory ..> ParkingChargeStrategy : creates
 SundayFreeParkingChargeStrategy ..> ParkingChargeStrategy : delegates
-SuvDiscountParkingChargeStrategy ..> ParkingChargeStrategy : decorates
+CompactDiscountParkingChargeStrategy ..> ParkingChargeStrategy : decorates
 
 ParkingApplication ..> ParkingOffice : creates
 ParkingApplication ..> ParkingService : creates and uses

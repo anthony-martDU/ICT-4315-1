@@ -1,9 +1,9 @@
 package com.example.parkingsystem;
 
 import com.example.parkingsystem.charges.strategy.HourlyParkingChargeStrategy;
+import com.example.parkingsystem.charges.strategy.CompactDiscountParkingChargeStrategy;
 import com.example.parkingsystem.charges.strategy.ParkingChargeStrategyFactory;
 import com.example.parkingsystem.charges.strategy.SundayFreeParkingChargeStrategy;
-import com.example.parkingsystem.charges.strategy.SuvDiscountParkingChargeStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -36,6 +36,34 @@ class ParkingChargeStrategyTest {
     }
 
     @Test
+    void compactDiscountIsAppliedAfterDailyMaximum() {
+        ParkingPermit permit = permitFor(CarType.COMPACT);
+        CompactDiscountParkingChargeStrategy strategy =
+                new CompactDiscountParkingChargeStrategy(
+                        new HourlyParkingChargeStrategy());
+
+        Money charge = strategy.calculateCharge(new Money(2),
+                LocalDateTime.of(2026, 9, 24, 0, 0),
+                LocalDateTime.of(2026, 9, 24, 10, 0), permit);
+
+        assertEquals(new Money(12), charge);
+    }
+
+    @Test
+    void suvIsNotDiscounted() {
+        ParkingPermit permit = permitFor(CarType.SUV);
+        CompactDiscountParkingChargeStrategy strategy =
+                new CompactDiscountParkingChargeStrategy(
+                        new HourlyParkingChargeStrategy());
+
+        Money charge = strategy.calculateCharge(new Money(2),
+                LocalDateTime.of(2026, 9, 24, 0, 0),
+                LocalDateTime.of(2026, 9, 24, 10, 0), permit);
+
+        assertEquals(new Money(15), charge);
+    }
+
+    @Test
     void sundayStrategyReturnsNoChargeOnSunday() {
         ParkingPermit permit = permitFor(CarType.SUV);
         SundayFreeParkingChargeStrategy strategy =
@@ -62,21 +90,20 @@ class ParkingChargeStrategyTest {
     }
 
     @Test
-    void suvDiscountIsAppliedAfterDailyMaximum() {
-        ParkingPermit permit = permitFor(CarType.SUV);
-        SuvDiscountParkingChargeStrategy strategy =
-                new SuvDiscountParkingChargeStrategy(new HourlyParkingChargeStrategy());
+    void factoryBuildsSundayFreeStrategyWithCompactDiscount() {
+        ParkingPermit permit = permitFor(CarType.COMPACT);
+        ParkingChargeStrategyFactory factory = new ParkingChargeStrategyFactory();
 
-        Money charge = strategy.calculateCharge(new Money(2),
-                LocalDateTime.of(2026, 9, 24, 0, 0),
+        Money charge = factory.create(true).calculateCharge(new Money(2),
+                LocalDateTime.of(2026, 9, 24, 9, 0),
                 LocalDateTime.of(2026, 9, 24, 10, 0), permit);
 
-        assertEquals(new Money(12), charge);
+        assertEquals(new Money(1.60), charge);
     }
 
     @Test
-    void factoryBuildsSundayFreeStrategyWithSuvDiscount() {
-        ParkingPermit permit = permitFor(CarType.SUV);
+    void factoryStillMakesSundayFreeForCompactCars() {
+        ParkingPermit permit = permitFor(CarType.COMPACT);
         ParkingChargeStrategyFactory factory = new ParkingChargeStrategyFactory();
 
         Money charge = factory.create(true).calculateCharge(new Money(2),
