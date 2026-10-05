@@ -1,5 +1,6 @@
 package com.example.parkingsystem;
 
+import com.example.parkingsystem.charges.factory.ParkingChargeStrategyFactory;
 import com.example.parkingsystem.charges.strategy.ParkingChargeStrategy;
 
 import java.time.LocalDateTime;
@@ -8,14 +9,14 @@ import java.util.Objects;
 public class ParkingLot {
     private final String name;
     private final Money baseRate;
-    private ParkingChargeStrategy chargeStrategy;
+        private ParkingChargeStrategyFactory chargeStrategyFactory;
 
     public ParkingLot(String name, Money baseRate,
-                      ParkingChargeStrategy chargeStrategy) {
+                  ParkingChargeStrategyFactory chargeStrategyFactory) {
         this.name = Objects.requireNonNull(name, "name");
         this.baseRate = Objects.requireNonNull(baseRate, "baseRate");
-        this.chargeStrategy = Objects.requireNonNull(chargeStrategy,
-                "chargeStrategy");
+        this.chargeStrategyFactory = Objects.requireNonNull(
+            chargeStrategyFactory, "chargeStrategyFactory");
     }
 
     public String getName() {
@@ -26,18 +27,19 @@ public class ParkingLot {
         return baseRate;
     }
 
-    public ParkingChargeStrategy getChargeStrategy() {
-        return chargeStrategy;
+    public ParkingChargeStrategyFactory getChargeStrategyFactory() {
+        return chargeStrategyFactory;
     }
 
-    public void setChargeStrategy(ParkingChargeStrategy chargeStrategy) {
-        this.chargeStrategy = Objects.requireNonNull(chargeStrategy,
-                "chargeStrategy");
+    public void setChargeStrategyFactory(
+            ParkingChargeStrategyFactory chargeStrategyFactory) {
+        this.chargeStrategyFactory = Objects.requireNonNull(
+                chargeStrategyFactory, "chargeStrategyFactory");
     }
 
     public Money calculateCharge(LocalDateTime entryTime, LocalDateTime exitTime,
                                  ParkingPermit permit) {
-        return chargeStrategy.calculateCharge(baseRate, entryTime, exitTime,
-                permit);
+        ParkingChargeStrategy strategy = chargeStrategyFactory.createStrategy();
+        return strategy.calculateCharge(baseRate, entryTime, exitTime, permit);
     }
 }

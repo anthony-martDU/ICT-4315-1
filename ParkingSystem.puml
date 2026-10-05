@@ -39,11 +39,11 @@ package "com.example.parkingsystem" {
     class ParkingLot {
         -name : String
         -baseRate : Money
-        -chargeStrategy : ParkingChargeStrategy
+        -chargeStrategyFactory : ParkingChargeStrategyFactory
         ..
-        +ParkingLot(name : String, baseRate : Money, strategy : ParkingChargeStrategy)
-        +getChargeStrategy() : ParkingChargeStrategy
-        +setChargeStrategy(strategy : ParkingChargeStrategy) : void
+        +ParkingLot(name : String, baseRate : Money, factory : ParkingChargeStrategyFactory)
+        +getChargeStrategyFactory() : ParkingChargeStrategyFactory
+        +setChargeStrategyFactory(factory : ParkingChargeStrategyFactory) : void
         +calculateCharge(entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
     }
 
@@ -54,8 +54,13 @@ package "com.example.parkingsystem" {
     class HourlyParkingChargeStrategy
     class SundayFreeParkingChargeStrategy
     class CompactDiscountParkingChargeStrategy
-    class ParkingChargeStrategyFactory {
-        +create(sundayIsFree : boolean) : ParkingChargeStrategy
+    interface ParkingChargeStrategyFactory {
+        +createStrategy() : ParkingChargeStrategy
+    }
+
+    class DefaultParkingChargeStrategyFactory {
+        -sundayIsFree : boolean
+        +createStrategy() : ParkingChargeStrategy
     }
 
     class ParkingTransaction {
@@ -69,7 +74,9 @@ package "com.example.parkingsystem" {
     }
 
     class TransactionManager {
-        +createTransaction(lot : ParkingLot, permit : ParkingPermit, entry : LocalDateTime, exit : LocalDateTime) : ParkingTransaction
+        -transactions : List<ParkingTransaction>
+        +park(lot : ParkingLot, permit : ParkingPermit, entry : LocalDateTime, exit : LocalDateTime) : ParkingTransaction
+        +getTransactions() : List<ParkingTransaction>
     }
 
     class ParkingChargeService {
@@ -186,13 +193,15 @@ Customer "0..*" --> "0..1" Address : address
 Car "0..*" --> "1" CarType : type
 
 ParkingLot "1" --> "1" Money : base rate
-ParkingLot "1" --> "1" ParkingChargeStrategy : uses
+ParkingLot "1" --> "1" ParkingChargeStrategyFactory : configures
 ParkingTransaction "1" --> "1" ParkingLot : lot
 ParkingTransaction "1" --> "1" ParkingPermit : permit
-TransactionManager ..> ParkingLot : charges
+TransactionManager ..> ParkingLot : parks in
+TransactionManager ..> ParkingChargeStrategyFactory : requests strategy
 TransactionManager ..> ParkingTransaction : creates
 ParkingChargeService ..> ParkingLot : calculates
 ParkingChargeStrategyFactory ..> ParkingChargeStrategy : creates
+DefaultParkingChargeStrategyFactory ..|> ParkingChargeStrategyFactory
 SundayFreeParkingChargeStrategy ..> ParkingChargeStrategy : delegates
 CompactDiscountParkingChargeStrategy ..> ParkingChargeStrategy : decorates
 

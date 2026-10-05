@@ -2,7 +2,7 @@ package com.example.parkingsystem;
 
 import com.example.parkingsystem.charges.strategy.HourlyParkingChargeStrategy;
 import com.example.parkingsystem.charges.strategy.CompactDiscountParkingChargeStrategy;
-import com.example.parkingsystem.charges.strategy.ParkingChargeStrategyFactory;
+import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
 import com.example.parkingsystem.charges.strategy.SundayFreeParkingChargeStrategy;
 import org.junit.jupiter.api.Test;
 
@@ -92,9 +92,10 @@ class ParkingChargeStrategyTest {
     @Test
     void factoryBuildsSundayFreeStrategyWithCompactDiscount() {
         ParkingPermit permit = permitFor(CarType.COMPACT);
-        ParkingChargeStrategyFactory factory = new ParkingChargeStrategyFactory();
+        DefaultParkingChargeStrategyFactory factory =
+                new DefaultParkingChargeStrategyFactory(true);
 
-        Money charge = factory.create(true).calculateCharge(new Money(2),
+        Money charge = factory.createStrategy().calculateCharge(new Money(2),
                 LocalDateTime.of(2026, 9, 24, 9, 0),
                 LocalDateTime.of(2026, 9, 24, 10, 0), permit);
 
@@ -104,9 +105,10 @@ class ParkingChargeStrategyTest {
     @Test
     void factoryStillMakesSundayFreeForCompactCars() {
         ParkingPermit permit = permitFor(CarType.COMPACT);
-        ParkingChargeStrategyFactory factory = new ParkingChargeStrategyFactory();
+        DefaultParkingChargeStrategyFactory factory =
+                new DefaultParkingChargeStrategyFactory(true);
 
-        Money charge = factory.create(true).calculateCharge(new Money(2),
+        Money charge = factory.createStrategy().calculateCharge(new Money(2),
                 LocalDateTime.of(2026, 9, 27, 9, 0),
                 LocalDateTime.of(2026, 9, 27, 10, 0), permit);
 
