@@ -2,6 +2,8 @@ package com.example.parkingsystem;
 
 import org.junit.jupiter.api.Test;
 
+import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -31,5 +33,16 @@ class ParkingOfficeTest {
         assertEquals("permit-1", permitId);
         assertSame(car, office.getCar(permitId));
         assertSame(car, office.getPermit(permitId).getCar());
+    }
+
+    @Test
+    void officeStoresParkingLotsForObserverRegistration() {
+        ParkingOffice office = new ParkingOffice();
+        ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
+                new DefaultParkingChargeStrategyFactory(false));
+
+        office.addParkingLot(lot);
+
+        assertSame(lot, office.getParkingLots().get(0));
     }
 }

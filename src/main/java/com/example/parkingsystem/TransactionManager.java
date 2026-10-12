@@ -18,16 +18,18 @@ public class TransactionManager {
         Objects.requireNonNull(entryTime, "entryTime");
         Objects.requireNonNull(exitTime, "exitTime");
 
-    Money charge = parkingLot.getChargeStrategyFactory().createStrategy()
-        .calculateCharge(parkingLot.getBaseRate(), entryTime,
-            exitTime, permit);
-    ParkingTransaction transaction = new ParkingTransaction(parkingLot,
-        permit, entryTime, exitTime, charge);
-    transactions.add(transaction);
-    return transaction;
+        Money charge = parkingLot.calculateCharge(entryTime, exitTime, permit);
+        ParkingTransaction transaction = new ParkingTransaction(parkingLot,
+                permit, entryTime, exitTime, charge);
+        recordTransaction(transaction);
+        return transaction;
+    }
+
+    public void recordTransaction(ParkingTransaction transaction) {
+        transactions.add(Objects.requireNonNull(transaction, "transaction"));
     }
 
     public List<ParkingTransaction> getTransactions() {
-    return Collections.unmodifiableList(transactions);
+        return Collections.unmodifiableList(transactions);
     }
 }

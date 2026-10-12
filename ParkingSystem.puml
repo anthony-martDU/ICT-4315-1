@@ -40,11 +40,45 @@ package "com.example.parkingsystem" {
         -name : String
         -baseRate : Money
         -chargeStrategyFactory : ParkingChargeStrategyFactory
+        -observers : List<ParkingAction>
         ..
         +ParkingLot(name : String, baseRate : Money, factory : ParkingChargeStrategyFactory)
+        +addObserver(observer : ParkingAction) : void
+        +removeObserver(observer : ParkingAction) : void
+        +enter(permit : ParkingPermit) : void
+        +enter(permit : ParkingPermit, timestamp : LocalDateTime) : void
+        +exit(permit : ParkingPermit) : void
+        +exit(permit : ParkingPermit, timestamp : LocalDateTime) : void
         +getChargeStrategyFactory() : ParkingChargeStrategyFactory
         +setChargeStrategyFactory(factory : ParkingChargeStrategyFactory) : void
         +calculateCharge(entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
+    }
+
+    interface ParkingAction {
+        +update(event : ParkingEvent) : void
+    }
+
+    class ParkingEvent {
+        -type : Type
+        -parkingLot : ParkingLot
+        -permit : ParkingPermit
+        -timestamp : LocalDateTime
+        +getType() : Type
+        +getParkingLot() : ParkingLot
+        +getPermit() : ParkingPermit
+        +getTimestamp() : LocalDateTime
+    }
+
+    enum ParkingEvent.Type {
+        ENTRY
+        EXIT
+    }
+
+    class ParkingObserver {
+        -transactionManager : TransactionManager
+        -activeVisits : Map<VisitKey, ParkingEvent>
+        +ParkingObserver(transactionManager : TransactionManager, office : ParkingOffice)
+        +update(event : ParkingEvent) : void
     }
 
     interface ParkingChargeStrategy {
@@ -76,6 +110,7 @@ package "com.example.parkingsystem" {
     class TransactionManager {
         -transactions : List<ParkingTransaction>
         +park(lot : ParkingLot, permit : ParkingPermit, entry : LocalDateTime, exit : LocalDateTime) : ParkingTransaction
+        +recordTransaction(transaction : ParkingTransaction) : void
         +getTransactions() : List<ParkingTransaction>
     }
 
@@ -121,10 +156,13 @@ package "com.example.parkingsystem" {
     class ParkingOffice {
         -customers : Map<String, Customer>
         -cars : Map<String, Car>
+        -parkingLots : List<ParkingLot>
         -nextCustomerNumber : int
         -nextPermitNumber : int
         ..
         +ParkingOffice()
+        +addParkingLot(parkingLot : ParkingLot) : void
+        +getParkingLots() : List<ParkingLot>
         +register(customer : Customer) : String
         +register(car : Car) : String
         +getCustomer(customerId : String) : Customer
@@ -194,6 +232,15 @@ Car "0..*" --> "1" CarType : type
 
 ParkingLot "1" --> "1" Money : base rate
 ParkingLot "1" --> "1" ParkingChargeStrategyFactory : configures
+ParkingLot "1" o-- "0..*" ParkingAction : observers
+ParkingLot ..> ParkingEvent : publishes
+ParkingObserver ..|> ParkingAction
+ParkingAction ..> ParkingEvent : update
+ParkingObserver --> TransactionManager : forwards to
+ParkingObserver ..> ParkingOffice : subscribes to lots
+ParkingOffice "1" o-- "0..*" ParkingLot : lots
+ParkingEvent --> ParkingLot : source
+ParkingEvent --> ParkingPermit : vehicle
 ParkingTransaction "1" --> "1" ParkingLot : lot
 ParkingTransaction "1" --> "1" ParkingPermit : permit
 TransactionManager ..> ParkingLot : parks in
