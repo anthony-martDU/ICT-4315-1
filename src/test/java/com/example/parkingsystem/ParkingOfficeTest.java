@@ -2,7 +2,7 @@ package com.example.parkingsystem;
 
 import org.junit.jupiter.api.Test;
 
-import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
+import edu.du.ict4315.charges.decorator.DefaultParkingChargeCalculatorFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -39,7 +39,7 @@ class ParkingOfficeTest {
     void officeStoresParkingLotsForObserverRegistration() {
         ParkingOffice office = new ParkingOffice();
         ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
-                new DefaultParkingChargeStrategyFactory(false));
+            new DefaultParkingChargeCalculatorFactory(false));
 
         office.addParkingLot(lot);
 

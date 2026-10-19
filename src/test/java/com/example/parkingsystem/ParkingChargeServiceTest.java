@@ -1,6 +1,6 @@
 package com.example.parkingsystem;
 
-import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
+import edu.du.ict4315.charges.decorator.DefaultParkingChargeCalculatorFactory;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ class ParkingChargeServiceTest {
     @Test
     void delegatesChargeCalculationToParkingLotStrategy() {
         ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
-                new DefaultParkingChargeStrategyFactory(true));
+                new DefaultParkingChargeCalculatorFactory(true));
         ParkingPermit permit = new ParkingPermit("permit-1",
                 new Car(CarType.COMPACT, "ABC-123", null));
 

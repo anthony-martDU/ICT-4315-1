@@ -1,7 +1,7 @@
 package com.example.parkingsystem;
 
-import com.example.parkingsystem.charges.factory.ParkingChargeStrategyFactory;
-import com.example.parkingsystem.charges.strategy.ParkingChargeStrategy;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculator;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculatorFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,15 +11,15 @@ import java.util.Objects;
 public class ParkingLot {
     private final String name;
     private final Money baseRate;
-    private ParkingChargeStrategyFactory chargeStrategyFactory;
+    private ParkingChargeCalculatorFactory chargeCalculatorFactory;
     private final List<ParkingAction> observers = new ArrayList<>();
 
     public ParkingLot(String name, Money baseRate,
-                  ParkingChargeStrategyFactory chargeStrategyFactory) {
+                  ParkingChargeCalculatorFactory chargeCalculatorFactory) {
         this.name = Objects.requireNonNull(name, "name");
         this.baseRate = Objects.requireNonNull(baseRate, "baseRate");
-        this.chargeStrategyFactory = Objects.requireNonNull(
-            chargeStrategyFactory, "chargeStrategyFactory");
+        this.chargeCalculatorFactory = Objects.requireNonNull(
+                chargeCalculatorFactory, "chargeCalculatorFactory");
     }
 
     public String getName() {
@@ -30,20 +30,21 @@ public class ParkingLot {
         return baseRate;
     }
 
-    public ParkingChargeStrategyFactory getChargeStrategyFactory() {
-        return chargeStrategyFactory;
+    public ParkingChargeCalculatorFactory getChargeCalculatorFactory() {
+        return chargeCalculatorFactory;
     }
 
-    public void setChargeStrategyFactory(
-            ParkingChargeStrategyFactory chargeStrategyFactory) {
-        this.chargeStrategyFactory = Objects.requireNonNull(
-                chargeStrategyFactory, "chargeStrategyFactory");
+    public void setChargeCalculatorFactory(
+            ParkingChargeCalculatorFactory chargeCalculatorFactory) {
+        this.chargeCalculatorFactory = Objects.requireNonNull(
+                chargeCalculatorFactory, "chargeCalculatorFactory");
     }
 
     public Money calculateCharge(LocalDateTime entryTime, LocalDateTime exitTime,
                                  ParkingPermit permit) {
-        ParkingChargeStrategy strategy = chargeStrategyFactory.createStrategy();
-        return strategy.calculateCharge(baseRate, entryTime, exitTime, permit);
+        ParkingChargeCalculator calculator =
+            chargeCalculatorFactory.createCalculator();
+        return calculator.getParkingCharge(entryTime, exitTime, this, permit);
     }
 
     public void addObserver(ParkingAction observer) {

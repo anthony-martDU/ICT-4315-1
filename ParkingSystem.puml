@@ -39,18 +39,18 @@ package "com.example.parkingsystem" {
     class ParkingLot {
         -name : String
         -baseRate : Money
-        -chargeStrategyFactory : ParkingChargeStrategyFactory
+        -chargeCalculatorFactory : ParkingChargeCalculatorFactory
         -observers : List<ParkingAction>
         ..
-        +ParkingLot(name : String, baseRate : Money, factory : ParkingChargeStrategyFactory)
+        +ParkingLot(name : String, baseRate : Money, factory : ParkingChargeCalculatorFactory)
         +addObserver(observer : ParkingAction) : void
         +removeObserver(observer : ParkingAction) : void
         +enter(permit : ParkingPermit) : void
         +enter(permit : ParkingPermit, timestamp : LocalDateTime) : void
         +exit(permit : ParkingPermit) : void
         +exit(permit : ParkingPermit, timestamp : LocalDateTime) : void
-        +getChargeStrategyFactory() : ParkingChargeStrategyFactory
-        +setChargeStrategyFactory(factory : ParkingChargeStrategyFactory) : void
+        +getChargeCalculatorFactory() : ParkingChargeCalculatorFactory
+        +setChargeCalculatorFactory(factory : ParkingChargeCalculatorFactory) : void
         +calculateCharge(entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
     }
 
@@ -79,22 +79,6 @@ package "com.example.parkingsystem" {
         -activeVisits : Map<VisitKey, ParkingEvent>
         +ParkingObserver(transactionManager : TransactionManager, office : ParkingOffice)
         +update(event : ParkingEvent) : void
-    }
-
-    interface ParkingChargeStrategy {
-        +calculateCharge(baseRate : Money, entry : LocalDateTime, exit : LocalDateTime, permit : ParkingPermit) : Money
-    }
-
-    class HourlyParkingChargeStrategy
-    class SundayFreeParkingChargeStrategy
-    class CompactDiscountParkingChargeStrategy
-    interface ParkingChargeStrategyFactory {
-        +createStrategy() : ParkingChargeStrategy
-    }
-
-    class DefaultParkingChargeStrategyFactory {
-        -sundayIsFree : boolean
-        +createStrategy() : ParkingChargeStrategy
     }
 
     class ParkingTransaction {
@@ -206,12 +190,47 @@ package "com.example.parkingsystem" {
     }
 }
 
+package "edu.du.ict4315.charges.decorator" {
+    abstract class ParkingChargeCalculator {
+        #ParkingChargeCalculator()
+        +getParkingCharge(entryTime : LocalDateTime, exitTime : LocalDateTime, lot : ParkingLot, permit : ParkingPermit) : Money
+    }
+
+    class FlatRateCalculator {
+        +getParkingCharge(entryTime : LocalDateTime, exitTime : LocalDateTime, lot : ParkingLot, permit : ParkingPermit) : Money
+    }
+
+    abstract class ParkingChargeCalculatorDecorator {
+        -component : ParkingChargeCalculator
+        #ParkingChargeCalculatorDecorator(component : ParkingChargeCalculator)
+    }
+
+    class CompactCarDiscountDecorator {
+        +getParkingCharge(entryTime : LocalDateTime, exitTime : LocalDateTime, lot : ParkingLot, permit : ParkingPermit) : Money
+    }
+
+    class SundayFreeParkingDecorator {
+        +getParkingCharge(entryTime : LocalDateTime, exitTime : LocalDateTime, lot : ParkingLot, permit : ParkingPermit) : Money
+    }
+
+    interface ParkingChargeCalculatorFactory {
+        +createCalculator() : ParkingChargeCalculator
+    }
+
+    class DefaultParkingChargeCalculatorFactory {
+        -sundayIsFree : boolean
+        +createCalculator() : ParkingChargeCalculator
+    }
+}
+
 ' Interface implementation
 RegisterCustomerCommand ..|> Command
 RegisterCarCommand ..|> Command
-HourlyParkingChargeStrategy ..|> ParkingChargeStrategy
-SundayFreeParkingChargeStrategy ..|> ParkingChargeStrategy
-CompactDiscountParkingChargeStrategy ..|> ParkingChargeStrategy
+FlatRateCalculator --|> ParkingChargeCalculator
+ParkingChargeCalculatorDecorator --|> ParkingChargeCalculator
+CompactCarDiscountDecorator --|> ParkingChargeCalculatorDecorator
+SundayFreeParkingDecorator --|> ParkingChargeCalculatorDecorator
+DefaultParkingChargeCalculatorFactory ..|> ParkingChargeCalculatorFactory
 
 ' Object relationships and dependencies
 ParkingService "1" *-- "2" Command : commands
@@ -231,7 +250,7 @@ Customer "0..*" --> "0..1" Address : address
 Car "0..*" --> "1" CarType : type
 
 ParkingLot "1" --> "1" Money : base rate
-ParkingLot "1" --> "1" ParkingChargeStrategyFactory : configures
+ParkingLot "1" --> "1" ParkingChargeCalculatorFactory : configures
 ParkingLot "1" o-- "0..*" ParkingAction : observers
 ParkingLot ..> ParkingEvent : publishes
 ParkingObserver ..|> ParkingAction
@@ -244,13 +263,13 @@ ParkingEvent --> ParkingPermit : vehicle
 ParkingTransaction "1" --> "1" ParkingLot : lot
 ParkingTransaction "1" --> "1" ParkingPermit : permit
 TransactionManager ..> ParkingLot : parks in
-TransactionManager ..> ParkingChargeStrategyFactory : requests strategy
 TransactionManager ..> ParkingTransaction : creates
 ParkingChargeService ..> ParkingLot : calculates
-ParkingChargeStrategyFactory ..> ParkingChargeStrategy : creates
-DefaultParkingChargeStrategyFactory ..|> ParkingChargeStrategyFactory
-SundayFreeParkingChargeStrategy ..> ParkingChargeStrategy : delegates
-CompactDiscountParkingChargeStrategy ..> ParkingChargeStrategy : decorates
+DefaultParkingChargeCalculatorFactory ..> FlatRateCalculator : creates base
+DefaultParkingChargeCalculatorFactory ..> CompactCarDiscountDecorator : applies
+DefaultParkingChargeCalculatorFactory ..> SundayFreeParkingDecorator : optionally applies
+ParkingChargeCalculatorDecorator "1" o-- "1" ParkingChargeCalculator : decorated component
+ParkingChargeCalculator ..> ParkingLot : reads base rate from
 
 ParkingApplication ..> ParkingOffice : creates
 ParkingApplication ..> ParkingService : creates and uses

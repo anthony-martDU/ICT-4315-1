@@ -1,8 +1,8 @@
 package com.example.parkingsystem;
 
-import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
-import com.example.parkingsystem.charges.factory.ParkingChargeStrategyFactory;
-import com.example.parkingsystem.charges.strategy.ParkingChargeStrategy;
+import edu.du.ict4315.charges.decorator.DefaultParkingChargeCalculatorFactory;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculator;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculatorFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ParkingChargeStrategyFactoryTest {
     @Test
-    void createsStrategyInstances() {
-        ParkingChargeStrategyFactory factory =
-                new DefaultParkingChargeStrategyFactory(true);
+    void createsCalculatorInstances() {
+        ParkingChargeCalculatorFactory factory =
+                new DefaultParkingChargeCalculatorFactory(true);
 
-        ParkingChargeStrategy first = factory.createStrategy();
-        ParkingChargeStrategy second = factory.createStrategy();
+        ParkingChargeCalculator first = factory.createCalculator();
+        ParkingChargeCalculator second = factory.createCalculator();
 
         assertNotNull(first);
         assertNotSame(first, second);

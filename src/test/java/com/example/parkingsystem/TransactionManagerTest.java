@@ -1,8 +1,8 @@
 package com.example.parkingsystem;
 
-import com.example.parkingsystem.charges.factory.DefaultParkingChargeStrategyFactory;
-import com.example.parkingsystem.charges.factory.ParkingChargeStrategyFactory;
-import com.example.parkingsystem.charges.strategy.ParkingChargeStrategy;
+import edu.du.ict4315.charges.decorator.DefaultParkingChargeCalculatorFactory;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculator;
+import edu.du.ict4315.charges.decorator.ParkingChargeCalculatorFactory;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ class TransactionManagerTest {
     @Test
     void createsTransactionUsingLotStrategy() {
         ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
-                new DefaultParkingChargeStrategyFactory(true));
+                new DefaultParkingChargeCalculatorFactory(true));
         ParkingPermit permit = new ParkingPermit("permit-1",
                 new Car(CarType.COMPACT, "ABC-123", null));
         LocalDateTime entry = LocalDateTime.of(2026, 9, 24, 9, 0);
@@ -34,7 +34,7 @@ class TransactionManagerTest {
         @Test
         void parkRecordsCreatedTransaction() {
                 ParkingLot lot = new ParkingLot("Main Lot", new Money(2),
-                                new DefaultParkingChargeStrategyFactory(false));
+                                new DefaultParkingChargeCalculatorFactory(false));
                 ParkingPermit permit = new ParkingPermit("permit-1",
                                 new Car(CarType.SUV, "ABC-123", null));
                 TransactionManager manager = new TransactionManager();
@@ -49,11 +49,20 @@ class TransactionManagerTest {
         @Test
         void parkRequestsStrategyFromLotFactory() {
                 AtomicInteger factoryCalls = new AtomicInteger();
-                ParkingChargeStrategy strategy =
-                                (baseRate, entryTime, exitTime, permit) -> new Money(9);
-                ParkingChargeStrategyFactory factory = () -> {
+                ParkingChargeCalculator calculator =
+                        new ParkingChargeCalculator() {
+                                @Override
+                                public Money getParkingCharge(
+                                        LocalDateTime entryTime,
+                                        LocalDateTime exitTime,
+                                        ParkingLot parkingLot,
+                                        ParkingPermit permit) {
+                                        return new Money(9);
+                                }
+                        };
+                ParkingChargeCalculatorFactory factory = () -> {
                         factoryCalls.incrementAndGet();
-                        return strategy;
+                        return calculator;
                 };
                 ParkingLot lot = new ParkingLot("Main Lot", new Money(2), factory);
                 ParkingPermit permit = new ParkingPermit("permit-1",
