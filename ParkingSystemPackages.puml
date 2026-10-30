@@ -1,0 +1,96 @@
+@startuml ParkingSystemPackages
+title Parking System - Proposed Package Diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "com.example.parkingsystem.app" as app {
+    class ParkingApplication
+}
+
+package "com.example.parkingsystem.application" as application {
+    class ParkingService
+    interface Command
+    class RegisterCustomerCommand
+    class RegisterCarCommand
+}
+
+package "com.example.parkingsystem.domain.model" as model {
+    class Address
+    class Car
+    enum CarType
+    class Customer
+    class Money
+    class ParkingPermit
+    class ParkingLot
+    interface ParkingAction
+    class ParkingEvent
+    class ParkingTransaction
+}
+
+package "com.example.parkingsystem.domain.port" as ports {
+    interface ParkingChargeCalculator
+    interface ParkingChargeCalculatorFactory
+}
+
+package "com.example.parkingsystem.domain.service" as services {
+    class ParkingOffice
+    class ParkingChargeService
+    class ParkingObserver
+    class TransactionManager
+}
+
+package "com.example.parkingsystem.pricing.strategy" as strategies {
+    interface ParkingChargeStrategy
+    class HourlyParkingChargeStrategy
+    class DailyParkingChargeStrategy
+    class SundayFreeParkingChargeStrategy
+    class CompactDiscountParkingChargeStrategy
+}
+
+package "com.example.parkingsystem.pricing.strategy.factory" as strategyFactory {
+    interface ParkingChargeStrategyFactory
+    class DefaultParkingChargeStrategyFactory
+}
+
+package "com.example.parkingsystem.pricing.calculator" as calculators {
+    class FlatRateCalculator
+    abstract class ParkingChargeCalculatorDecorator
+    class CompactCarDiscountDecorator
+    class SundayFreeParkingDecorator
+}
+
+package "com.example.parkingsystem.pricing.calculator.factory" as calculatorFactory {
+    class DefaultParkingChargeCalculatorFactory
+}
+
+app ..> application : starts
+app ..> services : assembles services
+app ..> strategyFactory : selects pricing rules
+app ..> calculatorFactory : configures lot pricing
+
+application ..> model : uses domain types
+application ..> services : invokes parking operations
+services ..> model : manages parking state
+model ..> ports : depends on pricing contracts
+
+strategies ..> model : calculates with domain values
+strategyFactory ..> strategies : creates strategy chains
+calculators ..> model : calculates with domain values
+calculators ..> ports : implements calculator contracts
+calculatorFactory ..> calculators : creates calculator chains
+calculatorFactory ..> ports : implements factory contract
+
+note bottom of ports
+  Keep these abstractions in the domain so
+  the parking model does not depend on a
+  specific pricing implementation.
+end note
+
+note bottom of services
+  ParkingOffice and TransactionManager currently
+  keep in-memory state. A future persistence layer
+  can be added behind domain-facing interfaces.
+end note
+
+@enduml
