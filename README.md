@@ -104,6 +104,28 @@ BUILD SUCCESS
 
 The Maven command also compiles the application and test classes before executing the tests.
 
+## Running the JSON Server and CLI Client
+
+The server listens on port `5050` by default. Start it in one terminal:
+
+```powershell
+mvn exec:java "-Dexec.mainClass=com.example.parkingsystem.Server"
+```
+
+In a second terminal, register a customer. The command prints the assigned customer ID:
+
+```powershell
+mvn exec:java "-Dexec.mainClass=com.example.parkingsystem.ServerClient" "-Dexec.args=CUSTOMER name=Rob address=123"
+```
+
+Use that ID to register a car:
+
+```powershell
+mvn exec:java "-Dexec.mainClass=com.example.parkingsystem.ServerClient" "-Dexec.args=CAR licensePlate=ROB4CO type=SUV customerId=customer-1"
+```
+
+The server and client exchange JSON request and response objects over TCP. Each message is framed with a four-byte length followed by UTF-8 JSON bytes. Set `PARKING_SERVER_HOST` or `PARKING_SERVER_PORT` to connect to a different host or port. The server accepts an optional port argument.
+
 ## Design Approach
 
 The project uses object-oriented principles by representing real-world parking system entities as individual Java classes.

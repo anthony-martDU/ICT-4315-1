@@ -74,6 +74,7 @@ class TransactionManagerTest {
 
                 assertEquals(1, factoryCalls.get());
                 assertEquals(new Money(9), transaction.getCharge());
+                //this is a comment
         }
 
 }
