@@ -124,7 +124,9 @@ Use that ID to register a car:
 mvn exec:java "-Dexec.mainClass=com.example.parkingsystem.ServerClient" "-Dexec.args=CAR licensePlate=ROB4CO type=SUV customerId=customer-1"
 ```
 
-The server and client exchange JSON request and response objects over TCP. Each message is framed with a four-byte length followed by UTF-8 JSON bytes. Set `PARKING_SERVER_HOST` or `PARKING_SERVER_PORT` to connect to a different host or port. The server accepts an optional port argument.
+The server and client exchange JSON request and response objects over TCP. Each message is framed with a four-byte length followed by UTF-8 JSON bytes. The server uses eight worker threads and queues up to 100 connections; excess connections are rejected instead of growing an unlimited queue. Client reads time out after 10 seconds. Set `PARKING_SERVER_HOST` or `PARKING_SERVER_PORT` to connect to a different host or port. The server accepts an optional port argument.
+
+The server can be stopped with `Ctrl+C`. Customer and car data are held in memory and will be cleared when the server stops.
 
 ## Design Approach
 
