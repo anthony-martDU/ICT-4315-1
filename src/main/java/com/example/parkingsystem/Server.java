@@ -2,6 +2,8 @@ package com.example.parkingsystem;
 
 import com.example.parkingsystem.protocol.ParkingRequestProcessor;
 import com.example.parkingsystem.protocol.JsonMessageIO;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -22,8 +24,9 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         int port = args.length == 0 ? DEFAULT_PORT : Integer.parseInt(args[0]);
-        ParkingRequestProcessor processor = new ParkingRequestProcessor(
-                new ParkingService(new ParkingOffice()));
+        Injector injector = Guice.createInjector(new ParkingSystemModule());
+        ParkingRequestProcessor processor =
+                injector.getInstance(ParkingRequestProcessor.class);
         ThreadPoolExecutor clientExecutor = createClientExecutor();
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {

@@ -1,9 +1,12 @@
 package com.example.parkingsystem;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 public class ParkingApplication {
     public static void main(String[] args) {
-        ParkingOffice office = new ParkingOffice();
-        ParkingService service = new ParkingService(office);
+        Injector injector = Guice.createInjector(new ParkingSystemModule());
+        ParkingService service = injector.getInstance(ParkingService.class);
 
         String customerId = service.performCommand("CUSTOMER", new String[]{
                 "name=John Smith",

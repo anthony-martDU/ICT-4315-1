@@ -14,6 +14,8 @@ The system is designed using separate classes that represent the major entities 
 
 * **Java**
 * **Maven**
+* **Guice** (dependency injection)
+* **Gson** (JSON)
 * **JUnit 5**
 * **Git**
 * **Visual Studio Code**
@@ -103,6 +105,8 @@ BUILD SUCCESS
 ```
 
 The Maven command also compiles the application and test classes before executing the tests.
+See [PROJECT_REPORT.md](PROJECT_REPORT.md) for architecture diagrams,
+dependency-injection details, testing, reflection, and proposed enhancements.
 
 ## Running the JSON Server and CLI Client
 

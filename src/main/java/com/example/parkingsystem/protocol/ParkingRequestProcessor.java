@@ -1,6 +1,7 @@
 package com.example.parkingsystem.protocol;
 
 import com.example.parkingsystem.ParkingService;
+import com.google.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Properties;
 public class ParkingRequestProcessor {
     private final ParkingService parkingService;
 
+    @Inject
     public ParkingRequestProcessor(ParkingService parkingService) {
         this.parkingService = Objects.requireNonNull(parkingService,
                 "parkingService");

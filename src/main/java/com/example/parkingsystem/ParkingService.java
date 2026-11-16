@@ -1,5 +1,7 @@
 package com.example.parkingsystem;
 
+import com.google.inject.Inject;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -8,6 +10,7 @@ public class ParkingService {
     private final ParkingOffice office;
     private final Map<String, Command> commands = new HashMap<>();
 
+    @Inject
     public ParkingService(ParkingOffice office) {
         this.office = office;
         register(new RegisterCustomerCommand(office));
